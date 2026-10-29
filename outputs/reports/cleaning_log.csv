@@ -1,0 +1,22 @@
+step,detail,rows_affected,action
+Column mapping,Row ID -> row_id; Order ID -> order_id; Order Date -> order_date; Ship Date -> ship_date; Ship Mode -> ship_mode; Customer ID -> customer_id; Country/Region -> country; City -> city; State/Province -> state; Postal Code -> postal_code; Division -> division; Region -> region; Product ID -> product_id; Product Name -> product_name; Sales -> sales; Units -> units; Gross Profit -> gross_profit; Cost -> cost,0,renamed
+Whitespace trim,Trimmed leading/trailing/double spaces in text columns,0,standardised
+Numeric parse: sales,"0 blank, 0 unparseable/missing after conversion",0,none needed
+Numeric parse: units,"0 blank, 0 unparseable/missing after conversion",0,none needed
+Numeric parse: gross_profit,"0 blank, 0 unparseable/missing after conversion",0,none needed
+Numeric parse: cost,"0 blank, 0 unparseable/missing after conversion",0,none needed
+Date parse: order_date,0 invalid; range 2024-01-02 to 2025-12-31,0,"invalid dates -> NaT (kept, excluded from time charts)"
+Date parse: ship_date,0 invalid; range 2026-06-30 to 2030-06-28,0,"invalid dates -> NaT (kept, excluded from time charts)"
+Ship Date plausibility,"Lag Order->Ship: min 904, median 1274, max 1642 days (plausible limit 60). Ship Date values fall after the dataset period, so they cannot be trusted.",10194,flagged ship_date_suspect; NO lead-time analysis performed
+Gross Profit check,|Sales - Cost - Gross Profit| > 0.01: 0 rows,0,all consistent
+Investigation: Negative sales (possible returns),0 rows,0,none found
+Investigation: Zero sales,0 rows,0,none found
+Investigation: Zero/negative units,0 rows,0,none found
+Investigation: Negative cost,0 rows,0,none found
+Investigation: Negative gross profit,0 rows,0,none found
+Investigation: Missing units,0 rows,0,none found
+Product ID/Name consistency,0 product names with >1 Product ID,0,none
+Order key derivation,"Order ID ends with Product ID in 100.0% of rows, so Order ID is a line key. Derived base_order_id = Order ID without product suffix to avoid double counting orders.",0,added base_order_id
+Duplicates - exact,"313 rows identical to an earlier row in every field except Row ID (revenue 3,499.51, i.e. 2.5% of total). Row ID is unique so no true record duplicates exist.",313,"flagged `possible_duplicate`, KEPT (cannot prove they are errors)"
+Duplicates - repeated Order ID,"Rows that share an Order ID with another row but differ in quantity/amount are treated as separate order lines (plausible split shipments/entries), not duplicates.",2705,kept
+Postal Code,Kept as text (leading zeros / Canadian codes preserved). Some US codes have 4 digits (leading zero lost in source) - not altered.,0,kept as text

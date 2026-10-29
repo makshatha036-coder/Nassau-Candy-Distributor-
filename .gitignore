@@ -1,0 +1,9 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.streamlit/secrets.toml
+.DS_Store
+# raw data is usually not committed - remove this line if you want it in the repo
+# data/raw/
